@@ -34,6 +34,7 @@ module Resque
         end
 
         def self.item_is_a_unique_job?(item)
+          return true if item[:class] == "Cli_Model_Updater_Appstore_Reviews"
           begin
             klass = constantize(item[:class] || item["class"])
             klass.included_modules.include?(::Resque::Plugins::UniqueJob)
