@@ -31,16 +31,17 @@ module Resque
         def self.unique_job_queue_key(queue, item)
           job_key = constantize(item[:class] || item["class"]).redis_key(item)
           "loners:queue:#{queue}:job:#{job_key}"
+        rescue
+          "loners:queue:#{queue}:job:#{Digest::MD5.hexdigest(item.to_s)}"
         end
 
         def self.item_is_a_unique_job?(item)
-          return true if item[:class] == "Cli_Model_Updater_Appstore_Reviews"
-          begin
-            klass = constantize(item[:class] || item["class"])
-            klass.included_modules.include?(::Resque::Plugins::UniqueJob)
-          rescue
-            false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
-          end     # so resque-loner should not start throwing up when that happens.
+          args = item[:args] || item['args']
+          return true if args.is_a?(Array) && (args.first[:uniq] || args.first['uniq'])
+          klass = constantize(item[:class] || item["class"])
+          klass.included_modules.include?(::Resque::Plugins::UniqueJob)
+        rescue
+          false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
         end
 
         def self.item_ttl(item)
