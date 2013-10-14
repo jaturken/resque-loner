@@ -30,9 +30,9 @@ module Resque
 
         def self.unique_job_queue_key(queue, item)
           args = item[:args] || item['args']
-          return 'args must be array' unless args.is_a?(Array)
+          raise 'args must be array' unless args.is_a?(Array)
           args_hash = args.first
-          return 'Args must contain hash' unless args_hash.is_a?(Array)
+          raise 'Args must contain hash' unless args_hash.is_a?(Hash)
           uniq_key = args_hash[:unique_key] || args_hash["unique_key"]
           "loners:queue:#{queue}:job:#{uniq_key}"
         end
