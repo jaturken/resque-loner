@@ -33,13 +33,13 @@ module Resque
           raise 'args must be array' unless args.is_a?(Array)
           args_hash = args.first
           raise 'Args must contain hash' unless args_hash.is_a?(Hash)
-          uniq_key = args_hash[:unique_key] || args_hash["unique_key"]
+          uniq_key = args_hash[:unique] || args_hash["unique"]
           "loners:queue:#{queue}:job:#{uniq_key}"
         end
 
         def self.item_is_a_unique_job?(item)
           args = item[:args] || item['args']
-          return true if args.is_a?(Array) && (args.first[:uniq] || args.first['uniq'])
+          return true if args.is_a?(Array) && (args.first[:unique] || args.first['unique'])
           klass = constantize(item[:class] || item["class"])
           klass.included_modules.include?(::Resque::Plugins::UniqueJob)
         rescue
