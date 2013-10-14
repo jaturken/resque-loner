@@ -29,10 +29,10 @@ module Resque
         end
 
         def self.unique_job_queue_key(queue, item)
-          job_key = constantize(item[:class] || item["class"]).redis_key(item)
-          "loners:queue:#{queue}:job:#{job_key}"
-        rescue
-          "loners:queue:#{queue}:job:#{Digest::MD5.hexdigest(item.to_s)}"
+          args = item[:args] || item['args']
+          return inless args.is_a?(Hash)
+          uniq_key = args[:uniq_key] || args["uniq_key"]
+          "loners:queue:#{queue}:job:#{uniq_key}"
         end
 
         def self.item_is_a_unique_job?(item)

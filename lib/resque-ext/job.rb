@@ -14,6 +14,9 @@ module Resque
     def self.create_with_loner(queue, klass, *args)
       return create_without_loner(queue, klass, *args) if Resque.inline?
       item = { :class => klass.to_s, :args => args }
+      if Resque::Plugins::Loner::Helpers.item_is_a_unique_job?(item)
+        item.merge!({ :uniq_key => Digest::MD5.hexdigest(args.to_s) })
+      end
       return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
       # multi block returns array of keys
       create_return_value = false
