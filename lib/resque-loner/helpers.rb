@@ -48,7 +48,18 @@ module Resque
 
         def self.item_ttl(item)
           begin
-            constantize(item[:class] || item["class"]).loner_ttl
+            args = item[:args] || item['args']
+
+            ttl_from_params = if args.is_a?(Array)
+                                args.first[:ttl] || args.first['ttl']
+                              else
+                                nil
+                              end
+            if ttl_from_params.is_a?(Fixnum)
+              ttl_from_params
+            else
+              constantize(item[:class] || item["class"]).loner_ttl
+            end
           rescue
             -1
           end
